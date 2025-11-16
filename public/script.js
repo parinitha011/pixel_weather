@@ -1,45 +1,38 @@
-const API_KEY = "c67d554c79c156ddaea086bb57d75ce5"; // your OpenWeather key
-
-
 /* -------------------------------------------------------
    SET BACKGROUND IMAGE
 ---------------------------------------------------------*/
 function setBackground(el, file) {
-    el.style.backgroundImage = `url('images/background/${file}')`;
+    el.style.backgroundImage = `url('images/${file}')`;
 }
 
-
 /* -------------------------------------------------------
-   REAL SEASON LOGIC (Astronomical Seasons)
+   REAL SEASONS
 ---------------------------------------------------------*/
 function getRealSeason(lat) {
     const north = lat > 0;
     const today = new Date();
     const y = today.getFullYear();
 
-    // Astronomical season dates
-    const spring = new Date(y, 2, 20);   // March 20
-    const summer = new Date(y, 5, 21);   // June 21
-    const autumn = new Date(y, 8, 23);   // Sept 23
-    const winter = new Date(y, 11, 21);  // Dec 21
+    const spring = new Date(y, 2, 20);
+    const summer = new Date(y, 5, 21);
+    const autumn = new Date(y, 8, 23);
+    const winter = new Date(y, 11, 21);
 
     if (north) {
-        if (today >= winter || today < spring) return "winter";
-        if (today >= spring && today < summer) return "spring";
-        if (today >= summer && today < autumn) return "summer";
-        return "autumn";
+        if (today >= winter || today < spring) return "winter.gif";
+        if (today >= spring && today < summer) return "spring.gif";
+        if (today >= summer && today < autumn) return "summer.gif";
+        return "autumn.gif";
     } else {
-        // Opposite for Southern Hemisphere
-        if (today >= winter || today < spring) return "summer";
-        if (today >= spring && today < summer) return "autumn";
-        if (today >= summer && today < autumn) return "winter";
-        return "spring";
+        if (today >= winter || today < spring) return "summer.gif";
+        if (today >= spring && today < summer) return "autumn.gif";
+        if (today >= summer && today < autumn) return "winter.gif";
+        return "spring.gif";
     }
 }
 
-
 /* -------------------------------------------------------
-   REAL EPA AQI CALCULATION (0–500)
+   AQI CALCULATION
 ---------------------------------------------------------*/
 function calculateAQI(pm25, pm10) {
 
@@ -68,61 +61,48 @@ function calculateAQI(pm25, pm10) {
         for (let r of ranges[ind]) {
             const [C_low, C_high, I_low, I_high] = r;
             if (C >= C_low && C <= C_high) {
-                return ((I_high - I_low) / (C_high - C_low)) * (C - C_low) + I_low;
+                return ((I_high - I_low) / (C_high - C_low)) *
+                    (C - C_low) + I_low;
             }
         }
         return 500;
     }
 
-    const aqi_pm25 = calc("pm25", pm25);
-    const aqi_pm10 = calc("pm10", pm10);
-
-    return Math.round(Math.max(aqi_pm25, aqi_pm10));
+    return Math.round(Math.max(
+        calc("pm25", pm25),
+        calc("pm10", pm10)
+    ));
 }
 
-
 /* -------------------------------------------------------
-   AIR POLLUTION API (OPENWEATHER)
+   FETCH AQI
 ---------------------------------------------------------*/
 async function getAQI(lat, lon) {
-    const url =
-      `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-
-    const res = await fetch(url);
+    const res = await fetch(`/aqi?lat=${lat}&lon=${lon}`);
     const data = await res.json();
 
-    const c = data.list[0].components;
-    const pm25 = c.pm2_5;
-    const pm10 = c.pm10;
+    // guard: if data.list or components missing, return fallback
+    if (!data || !data.list || !data.list[0] || !data.list[0].components) {
+        return "N/A";
+    }
 
-    return calculateAQI(pm25, pm10);
+    const c = data.list[0].components;
+    return calculateAQI(c.pm2_5, c.pm10);
 }
 
-
 /* -------------------------------------------------------
-   CHOOSE BACKGROUND (REAL SEASON-BASED)
+   CHOOSE BACKGROUND
 ---------------------------------------------------------*/
 function chooseBackground(main, temp, wind, lat) {
-
-    // Weather-based overrides FIRST
     if (wind >= 20) return "windyy.gif";
     if (main === "Rain" || main === "Drizzle") return "rainy.gif";
     if (main === "Snow") return "winter.gif";
 
-    // Clouds should match season, NOT force autumn
-    if (main === "Clouds") {
-        const season = getRealSeason(lat);
-        return season + ".gif";  // cloudy winter? winter.gif
-    }
-
-    // If nothing else overrides → use real season
-    const season = getRealSeason(lat);
-    return season + ".gif";
+    return getRealSeason(lat);
 }
 
-
 /* -------------------------------------------------------
-   MOOD TEXT
+   MOOD
 ---------------------------------------------------------*/
 function chooseMood(main, temp, wind) {
     if (wind >= 20) return "Windy 💨";
@@ -132,69 +112,86 @@ function chooseMood(main, temp, wind) {
     return "Clear 🌤";
 }
 
-
 /* -------------------------------------------------------
-   UPDATE UI
+   UPDATE WINDOW
 ---------------------------------------------------------*/
 async function updateWindow(prefix, data) {
+
+    // basic guards
+    if (!data || !data.weather || !data.weather[0] || !data.main) return;
 
     const main = data.weather[0].main;
     const temp = Math.round(data.main.temp);
     const humidity = data.main.humidity;
     const wind = Math.round(data.wind.speed * 3.6);
-    const lat = data.coord.lat;
-    const lon = data.coord.lon;
 
+    const lat = data.coord ? data.coord.lat : 0;
+    const lon = data.coord ? data.coord.lon : 0;
+
+    // background
     const bg = chooseBackground(main, temp, wind, lat);
     setBackground(document.getElementById(prefix + "Background"), bg);
 
-    document.getElementById(prefix + "Temp").textContent = temp + "°C";
-    document.getElementById(prefix + "Humidity").textContent = "H: " + humidity + "%";
-    document.getElementById(prefix + "Wind").textContent = "W: " + wind + " km/h";
+    // main data
+    document.getElementById(prefix + "Temp").textContent = `${temp}°C`;
+    document.getElementById(prefix + "Humidity").textContent = `H: ${humidity}%`;
+    document.getElementById(prefix + "Wind").textContent = `W: ${wind} km/h`;
 
+    // AQI
     const aqi = await getAQI(lat, lon);
-    document.getElementById(prefix + "AQI").textContent = "AQI: " + aqi;
+    document.getElementById(prefix + "AQI").textContent = `AQI: ${aqi}`;
 
+    // mood + tomorrow
     document.getElementById(prefix + "Mood").textContent =
         chooseMood(main, temp, wind);
 
     document.getElementById(prefix + "Tomorrow").textContent =
-        "Tomorrow: " + main;
+        `Tomorrow: ${main}`;
 
+    // feels like side box
     document.getElementById(prefix + "Side").textContent =
-        "Feels like: " + Math.round(data.main.feels_like) + "°C";
+        `Feels like: ${Math.round(data.main.feels_like)}°C`;
 
-    // Sakura popup
-    document.getElementById("popupCity").textContent = "City: " + data.name;
-    document.getElementById("popupCountry").textContent =
-        "Country: " + data.sys.country;
-    document.getElementById("popupSeason").textContent =
-        "Season: " + bg.replace(".gif", "");
-    document.getElementById("popupSunrise").textContent =
-        "Sunrise: " + new Date(data.sys.sunrise * 1000).toLocaleTimeString();
-    document.getElementById("popupSunset").textContent =
-        "Sunset: " + new Date(data.sys.sunset * 1000).toLocaleTimeString();
-}
+
+    // --- SAKURA POPUP (simple direct updates) ---
+    const popupCityEl = document.getElementById("popupCity");
+    const popupCountryEl = document.getElementById("popupCountry");
+    const popupSeasonEl = document.getElementById("popupSeason");
+    const popupSunriseEl = document.getElementById("popupSunrise");
+    const popupSunsetEl = document.getElementById("popupSunset");
+
+    if (popupCityEl) popupCityEl.textContent =
+        "City: " + (data.name || "--");
+
+    if (popupCountryEl) popupCountryEl.textContent =
+        "Country: " + (data.sys && data.sys.country ? data.sys.country : "--");
+
+    // compute a season label (match your background)
+    if (popupSeasonEl) popupSeasonEl.textContent =
+        "Season: " + (typeof bg === "string" ? bg.replace(".gif", "") : "--");
+
+    // sunrise / sunset (guarded)
+    if (popupSunriseEl) popupSunriseEl.textContent =
+        "Sunrise: " + (data.sys && data.sys.sunrise ? new Date(data.sys.sunrise * 1000).toLocaleTimeString() : "--");
+
+    if (popupSunsetEl) popupSunsetEl.textContent =
+        "Sunset: " + (data.sys && data.sys.sunset ? new Date(data.sys.sunset * 1000).toLocaleTimeString() : "--");
+} // end updateWindow
 
 
 /* -------------------------------------------------------
-   WEATHER API
+   API CALLS
 ---------------------------------------------------------*/
-async function getWeatherByCoords(lat, lon) {
-    const url =
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
-    return (await fetch(url)).json();
-}
-
 async function getWeather(city) {
-    const url =
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
-    return (await fetch(url)).json();
+    return (await fetch(`/weather?city=${city}`)).json();
 }
 
+async function getWeatherByCoords(lat, lon) {
+    return (await fetch(`/weathercoords?lat=${lat}&lon=${lon}`)).json();
+}
 
 /* -------------------------------------------------------
-   LOAD AUTO LOCATION
+   INIT
 ---------------------------------------------------------*/
 function loadAuto() {
     navigator.geolocation.getCurrentPosition(async pos => {
@@ -203,35 +200,30 @@ function loadAuto() {
             pos.coords.longitude
         );
         updateWindow("auto", data);
+    }, (err) => {
+        // silently fail geolocation if user blocks it
+        console.warn("Geolocation failed:", err);
     });
 }
 
-
-/* -------------------------------------------------------
-   CITY SEARCH
----------------------------------------------------------*/
 async function loadCity() {
-    const c = document.getElementById("cityInput").value.trim();
-    if (!c) return;
-    const data = await getWeather(c);
+    const city = document.getElementById("cityInput").value.trim();
+    if (!city) return;
+
+    const data = await getWeather(city);
     updateWindow("search", data);
 }
 
-
-/* -------------------------------------------------------
-   INIT
----------------------------------------------------------*/
 document.addEventListener("DOMContentLoaded", () => {
-
     loadAuto();
 
+    // keep the calm GIF as initial search background
     setBackground(
         document.getElementById("searchBackground"),
         "sunday-mornings_calm.gif"
     );
 
     document.getElementById("searchBtn").addEventListener("click", loadCity);
-
     document.getElementById("cityInput").addEventListener("keydown", e => {
         if (e.key === "Enter") loadCity();
     });
