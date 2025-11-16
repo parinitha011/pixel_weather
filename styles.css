@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: black;
+    font-family: 'Press Start 2P', cursive;
+    color: #1b4332;
+}
+
+.page { max-width: 900px; margin: 30px auto; }
+
+.title {
+    text-align: center;
+    color: #d8f3dc;
+    font-size: 22px;
+    margin-bottom: 40px;
+}
+
+.windows {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
+}
+
+/* RETRO WINDOW */
+.retro-window {
+    width: 750px;
+    background: #d8f3dc;
+    border: 6px solid #95d5b2;
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 6px 0 #1b4332;
+}
+
+.window-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.circles span {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.red { background: #ff6b6b; }
+.yellow { background: #ffe16b; }
+.green { background: #9bff8a; }
+
+.window-body {
+    height: 420px;
+    background: #b7e4c7;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* GIF */
+.background {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 80px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+}
+
+/* FLOATING TEXT */
+.float-info {
+    position: absolute;
+    bottom: 40px;   /* extra room so stats can move DOWN */
+    left: 30px;
+    z-index: 5;
+    color: #081c15;
+    text-shadow: 0px 0px 3px #95d5b2;
+}
+
+/* TEMP + STATS ROW */
+.temp-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* TEMPERATURE */
+.temp {
+    font-size: 40px;
+    color: #c3dad2;
+    text-shadow: 0px 0px 3px #95d5b2;
+}
+
+/* STACKED STATS – FINAL FIX */
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    top: 50px;     /* move ONLY stats DOWN */
+}
+
+.stats span {
+    font-size: 11px;
+    color: #1b4332;
+}
+
+.mood {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #1b4332;
+}
+
+.tomorrow {
+    font-size: 10px;
+    margin-top: 4px;
+    color: #1b4332;
+}
+
+/* SIDE BOX */
+.side-box {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 14px;
+    font-size: 10px;
+    background: rgba(255,255,255,0.35);
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+    color: #1b4332;
+}
+
+/* SEARCH BAR */
+.search-bar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 2px solid #1b4332;
+}
+
+.search-bar button {
+    padding: 8px 12px;
+    background: #40916c;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* SAKURA BUTTON */
+.sakura-circle {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    position: relative;
+    width: 45px;
+    height: 45px;
+    background: #95d5b2;
+    border-radius: 50%;
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 0 4px 0 #79b896;
+    cursor: pointer;
+}
+
+.sakura-popup {
+    position: absolute;
+    left: 60px;
+    bottom: 0;
+    width: 180px;
+    padding: 12px;
+    background: #397253;
+    border: 2px solid #2d764e;
+    border-radius: 12px;
+    font-size: 10px;
+    display: none;
+    color: white;
+}
+
+.sakura-circle:hover .sakura-popup {
+    display: block;
+}

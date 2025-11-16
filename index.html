@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Weather</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<main class="page">
+
+    <header class="title">PIXEL WEATHER.EXE</header>
+
+    <section class="windows">
+
+        <!-- AUTO LOCATION -->
+        <article class="retro-window">
+            <div class="window-top">
+                <div class="circles">
+                    <span class="red"></span>
+                    <span class="yellow"></span>
+                    <span class="green"></span>
+                </div>
+                <div class="window-title">YOUR LOCATION</div>
+            </div>
+
+            <div class="window-body">
+
+                <div class="background" id="autoBackground"></div>
+
+                <div class="float-info">
+
+                    <div class="temp-row">
+                        <div class="temp" id="autoTemp">--°C</div>
+
+                        <div class="stats">
+                            <span id="autoHumidity">H: --%</span>
+                            <span id="autoWind">W: -- km/h</span>
+                            <span id="autoAQI">AQI: --</span>
+                        </div>
+                    </div>
+
+                    <div class="mood" id="autoMood">--</div>
+                    <div class="tomorrow" id="autoTomorrow">Tomorrow: --</div>
+                </div>
+
+                <div class="side-box" id="autoSide">Feels like: --°C</div>
+
+            </div>
+        </article>
+
+        <!-- SEARCH CITY -->
+        <article class="retro-window">
+            <div class="window-top">
+                <div class="circles">
+                    <span class="red"></span>
+                    <span class="yellow"></span>
+                    <span class="green"></span>
+                </div>
+                <div class="window-title">SEARCH CITY</div>
+            </div>
+
+            <div class="window-body">
+
+                <div class="search-bar">
+                    <input id="cityInput" placeholder="Enter city..." />
+                    <button id="searchBtn">Search</button>
+                </div>
+
+                <div class="background" id="searchBackground"></div>
+
+                <div class="float-info">
+
+                    <div class="temp-row">
+                        <div class="temp" id="searchTemp">--°C</div>
+
+                        <div class="stats">
+                            <span id="searchHumidity">H: --%</span>
+                            <span id="searchWind">W: -- km/h</span>
+                            <span id="searchAQI">AQI: --</span>
+                        </div>
+                    </div>
+
+                    <div class="mood" id="searchMood">--</div>
+                    <div class="tomorrow" id="searchTomorrow">Tomorrow: --</div>
+                </div>
+
+                <div class="side-box" id="searchSide">Feels like: --°C</div>
+
+            </div>
+        </article>
+
+    </section>
+
+</main>
+
+<!-- GLOBAL SAKURA BUTTON -->
+<div class="sakura-circle">
+    🍃
+    <div class="sakura-popup">
+        <div id="popupCity">City: --</div>
+        <div id="popupCountry">Country: --</div>
+        <div id="popupSeason">Season: --</div>
+        <div id="popupSunrise">Sunrise: --</div>
+        <div id="popupSunset">Sunset: --</div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
