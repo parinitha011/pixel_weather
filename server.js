@@ -12,7 +12,19 @@ const API_KEY = process.env.API_KEY;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// serve files from /public
+/* -------------------------------------------------------
+   DISABLE CACHING (REQUIRED FOR RENDER !!!)
+---------------------------------------------------------*/
+app.use((req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+});
+
+/* -------------------------------------------------------
+   SERVE STATIC FILES
+---------------------------------------------------------*/
 app.use(express.static(path.join(__dirname, "public")));
 
 /* -------------------------------------------------------
