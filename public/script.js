@@ -76,7 +76,7 @@ function calculateAQI(pm25, pm10) {
    FETCH AQI
 ---------------------------------------------------------*/
 async function getAQI(lat, lon) {
-    const res = await fetch(`/aqi?lat=${lat}&lon=${lon}`);
+    const res = await fetch(`https://pixel-weather.onrender.com/aqi?lat=${lat}&lon=${lon}`);
     const data = await res.json();
 
     if (!data || !data.list || !data.list[0] || !data.list[0].components) {
@@ -176,11 +176,11 @@ async function updateWindow(prefix, data) {
    API CALLS
 ---------------------------------------------------------*/
 async function getWeather(city) {
-    return (await fetch(`/weather?city=${city}`)).json();
+    return (await fetch(`https://pixel-weather.onrender.com/weather?city=${city}`)).json();
 }
 
 async function getWeatherByCoords(lat, lon) {
-    return (await fetch(`/weathercoords?lat=${lat}&lon=${lon}`)).json();
+    return (await fetch(`https://pixel-weather.onrender.com/weathercoords?lat=${lat}&lon=${lon}`)).json();
 }
 
 /* -------------------------------------------------------
