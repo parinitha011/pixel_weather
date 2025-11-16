@@ -2,7 +2,7 @@
    SET BACKGROUND IMAGE
 ---------------------------------------------------------*/
 function setBackground(el, file) {
-    el.style.backgroundImage = `url('images/${file}')`;
+    el.style.backgroundImage = `url('/images/${file}')`;
 }
 
 /* -------------------------------------------------------
@@ -35,7 +35,6 @@ function getRealSeason(lat) {
    AQI CALCULATION
 ---------------------------------------------------------*/
 function calculateAQI(pm25, pm10) {
-
     function calc(ind, C) {
         const ranges = {
             pm25: [
@@ -68,10 +67,9 @@ function calculateAQI(pm25, pm10) {
         return 500;
     }
 
-    return Math.round(Math.max(
-        calc("pm25", pm25),
-        calc("pm10", pm10)
-    ));
+    return Math.round(
+        Math.max(calc("pm25", pm25), calc("pm10", pm10))
+    );
 }
 
 /* -------------------------------------------------------
@@ -81,7 +79,6 @@ async function getAQI(lat, lon) {
     const res = await fetch(`/aqi?lat=${lat}&lon=${lon}`);
     const data = await res.json();
 
-    // guard: if data.list or components missing, return fallback
     if (!data || !data.list || !data.list[0] || !data.list[0].components) {
         return "N/A";
     }
@@ -117,14 +114,12 @@ function chooseMood(main, temp, wind) {
 ---------------------------------------------------------*/
 async function updateWindow(prefix, data) {
 
-    // basic guards
     if (!data || !data.weather || !data.weather[0] || !data.main) return;
 
     const main = data.weather[0].main;
     const temp = Math.round(data.main.temp);
     const humidity = data.main.humidity;
     const wind = Math.round(data.wind.speed * 3.6);
-
     const lat = data.coord ? data.coord.lat : 0;
     const lon = data.coord ? data.coord.lon : 0;
 
@@ -148,36 +143,34 @@ async function updateWindow(prefix, data) {
     document.getElementById(prefix + "Tomorrow").textContent =
         `Tomorrow: ${main}`;
 
-    // feels like side box
+    // feels like
     document.getElementById(prefix + "Side").textContent =
         `Feels like: ${Math.round(data.main.feels_like)}°C`;
 
+    /* ---------------------------
+       SAKURA POPUP — FIXED
+    ----------------------------*/
+    const seasonLabel = bg ? bg.replace(".gif", "") : "--";
 
-    // --- SAKURA POPUP (simple direct updates) ---
-    const popupCityEl = document.getElementById("popupCity");
-    const popupCountryEl = document.getElementById("popupCountry");
-    const popupSeasonEl = document.getElementById("popupSeason");
-    const popupSunriseEl = document.getElementById("popupSunrise");
-    const popupSunsetEl = document.getElementById("popupSunset");
-
-    if (popupCityEl) popupCityEl.textContent =
+    document.getElementById("popupCity").textContent =
         "City: " + (data.name || "--");
 
-    if (popupCountryEl) popupCountryEl.textContent =
-        "Country: " + (data.sys && data.sys.country ? data.sys.country : "--");
+    document.getElementById("popupCountry").textContent =
+        "Country: " + (data.sys?.country || "--");
 
-    // compute a season label (match your background)
-    if (popupSeasonEl) popupSeasonEl.textContent =
-        "Season: " + (typeof bg === "string" ? bg.replace(".gif", "") : "--");
+    document.getElementById("popupSeason").textContent =
+        "Season: " + seasonLabel;
 
-    // sunrise / sunset (guarded)
-    if (popupSunriseEl) popupSunriseEl.textContent =
-        "Sunrise: " + (data.sys && data.sys.sunrise ? new Date(data.sys.sunrise * 1000).toLocaleTimeString() : "--");
+    document.getElementById("popupSunrise").textContent =
+        "Sunrise: " + (data.sys?.sunrise
+            ? new Date(data.sys.sunrise * 1000).toLocaleTimeString()
+            : "--");
 
-    if (popupSunsetEl) popupSunsetEl.textContent =
-        "Sunset: " + (data.sys && data.sys.sunset ? new Date(data.sys.sunset * 1000).toLocaleTimeString() : "--");
-} // end updateWindow
-
+    document.getElementById("popupSunset").textContent =
+        "Sunset: " + (data.sys?.sunset
+            ? new Date(data.sys.sunset * 1000).toLocaleTimeString()
+            : "--");
+}
 
 /* -------------------------------------------------------
    API CALLS
@@ -200,10 +193,7 @@ function loadAuto() {
             pos.coords.longitude
         );
         updateWindow("auto", data);
-    }, (err) => {
-        // silently fail geolocation if user blocks it
-        console.warn("Geolocation failed:", err);
-    });
+    }, err => console.warn("Geo failed:", err));
 }
 
 async function loadCity() {
@@ -217,7 +207,6 @@ async function loadCity() {
 document.addEventListener("DOMContentLoaded", () => {
     loadAuto();
 
-    // keep the calm GIF as initial search background
     setBackground(
         document.getElementById("searchBackground"),
         "sunday-mornings_calm.gif"
